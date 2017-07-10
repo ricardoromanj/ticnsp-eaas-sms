@@ -1,0 +1,16 @@
+{
+  "passPerPreset": true,
+  "presets": [
+    "es2015",
+    "stage-2"
+  ],
+  "plugins": [
+    "babel-plugin-inline-import",
+    [
+      "babel-root-import", 
+      {
+        "rootPathPrefix": "@"
+      }
+    ]
+  ]
+}
