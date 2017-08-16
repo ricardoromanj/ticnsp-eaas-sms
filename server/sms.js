@@ -59,23 +59,42 @@ router.get('/replyLiturgy', (req, res) => {
   } else {
     logger.debug('Requested date: ' + reqDate);
     request.get(`${settings.liturgicEndpoint}?date=${reqDate}`, function(err, httpResponse, body) {
-      var liturgy = JSON.parse(body).data.content;
-      logger.debug('Liturgy: ' + JSON.stringify(liturgy));
+      let litData = JSON.parse(body).data;
+      if (typeof(litData) === 'string') {
+        // If there was an error, send that error back
+        res.send(xml({
+          "Response": [{
+            "Sms": litData
+          }]
+        }));
+      } else {
+        let liturgy = litData.content;
+        logger.debug('Liturgy: ' + JSON.stringify(liturgy));
 
-      // Go through response and collect what is needed.
-      smsResponse = smsResponse.concat(`${liturgy['fr']['st']}`);
-      smsResponse = smsResponse.concat('\n' + liturgy['ps']['st']);
-      if ('sr' in liturgy) { smsResponse = smsResponse.concat('\n' + liturgy['sr']['st']); }
-      smsResponse = smsResponse.concat('\n' + liturgy['gsp']['st']);
+        // Go through response and collect what is needed.
+        if (typeof(liturgy['fr']['st']) === 'undefined') {
+          // Send response back
+          res.send(xml({
+            "Response": [{
+              "Sms": "Date is too far away"
+            }]
+          }));
+        } else {
+          smsResponse = smsResponse.concat(`${liturgy['fr']['st']}`);
+          smsResponse = smsResponse.concat('\n' + liturgy['ps']['st']);
+          if ('sr' in liturgy) { smsResponse = smsResponse.concat('\n' + liturgy['sr']['st']); }
+          smsResponse = smsResponse.concat('\n' + liturgy['gsp']['st']);
 
-      logger.debug('smsResponse: ' + smsResponse);
+          logger.debug('smsResponse: ' + smsResponse);
 
-      // Send response back
-      res.send(xml({
-        "Response": [{
-          "Sms": smsResponse
-        }]
-      }));
+          // Send response back
+          res.send(xml({
+            "Response": [{
+              "Sms": smsResponse
+            }]
+          }));
+        }
+      }
     });
   }
 
