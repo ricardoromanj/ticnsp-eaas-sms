@@ -5,7 +5,7 @@ services:
     image: ticnspadmin/ticnsp_eaas_srv
     command: npm start
     environment:
-      MONGO_URL: "mongodb://db/ticnsp_eaas"
+      MONGO_HOST: "db"
       LOG_LEVEL: "debug"
     ports:
       - 8000:5000
@@ -17,6 +17,8 @@ services:
     environment:
       LITURGIC_ENDPOINT: "http://srv:5000/liturgy"
       LOG_LEVEL: "debug"
+    volumes:
+      - "./numbers.json:/numbers.json"
     ports:
       - 8001:5001
     networks:
